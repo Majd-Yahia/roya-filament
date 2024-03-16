@@ -18,9 +18,11 @@ class AdminSeeder extends Seeder
         // Seed a user
         $user = User::create([
             'name' => 'Testing Admin',
-            'email' => 'test@admin.com',
+            'email' => 'admin@admin.com',
             'password' => bcrypt('password'),
         ]);
+        $user->email_verified_at = now();
+        $user->save();
 
         // Retrieve roles and permissions
         $adminRole = Role::where('name', 'admin')->first();
@@ -37,6 +39,8 @@ class AdminSeeder extends Seeder
             'email' => 'viewer@admin.com',
             'password' => bcrypt('password'),
         ]);
+        $viewerUser->email_verified_at = now();
+        $viewerUser->save();
 
         // Retrieve roles and permissions
         $viewerRole = Role::where('name', 'viewer')->first();
