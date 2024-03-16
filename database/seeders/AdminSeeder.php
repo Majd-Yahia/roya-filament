@@ -26,10 +26,10 @@ class AdminSeeder extends Seeder
         $user->save();
 
         // Retrieve roles and permissions
-        $adminRole = Role::where('name', 'admin')->first();
+        $adminRole = Role::get();
 
         // Assign roles to user
-        $user->roles()->sync($adminRole);
+        $user->roles()->sync($adminRole->pluck('id'));
 
 
         // ========================================================================
@@ -45,7 +45,7 @@ class AdminSeeder extends Seeder
         $viewerOnlyUser->save();
 
         // Retrieve roles and permissions
-        $viewerRole = Role::where('name', 'viewer')->first();
+        $viewerRole = $adminRole->firstWhere('name', 'viewer')->id;
 
         // Assign roles to user
         $viewerOnlyUser->roles()->sync($viewerRole);
@@ -64,7 +64,7 @@ class AdminSeeder extends Seeder
         $moderateUser->save();
 
         // Retrieve roles and permissions
-        $moderatorRole = Role::where('name', 'role-moderator')->first();
+        $moderatorRole = $adminRole->firstWhere('name', 'role-moderator')->id;
 
         // Assign roles to user
         $moderateUser->roles()->sync($moderatorRole);
