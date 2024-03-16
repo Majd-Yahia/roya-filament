@@ -21,7 +21,7 @@ cd roya-filament
 composer install
 ```
 
-## Do not forget to add the .env to your system before you run the commands below
+### Do not forget to copy .env.example before you continue
 
 - Run optimize
 ```
