@@ -22,6 +22,7 @@ class AdminSeeder extends Seeder
             'password' => bcrypt('password'),
         ]);
         $user->email_verified_at = now();
+        $user->is_admin = true;
         $user->save();
 
         // Retrieve roles and permissions
@@ -32,20 +33,40 @@ class AdminSeeder extends Seeder
 
 
         // ========================================================================
-        // For testing purposes only.
+        // For testing purposes only. ViewerOnly User
         // ========================================================================
-        $viewerUser = User::create([
+        $viewerOnlyUser = User::create([
             'name' => 'Testing Viewer',
             'email' => 'viewer@admin.com',
             'password' => bcrypt('password'),
         ]);
-        $viewerUser->email_verified_at = now();
-        $viewerUser->save();
+        $viewerOnlyUser->email_verified_at = now();
+        $viewerOnlyUser->is_admin = true;
+        $viewerOnlyUser->save();
 
         // Retrieve roles and permissions
         $viewerRole = Role::where('name', 'viewer')->first();
 
         // Assign roles to user
-        $viewerUser->roles()->sync($viewerRole);
+        $viewerOnlyUser->roles()->sync($viewerRole);
+
+
+        // ========================================================================
+        // For testing purposes only. Viewer Delete Role User
+        // ========================================================================
+        $moderateUser = User::create([
+            'name' => 'Testing Viewer',
+            'email' => 'role-moderator@admin.com',
+            'password' => bcrypt('password'),
+        ]);
+        $moderateUser->email_verified_at = now();
+        $moderateUser->is_admin = true;
+        $moderateUser->save();
+
+        // Retrieve roles and permissions
+        $moderatorRole = Role::where('name', 'role-moderator')->first();
+
+        // Assign roles to user
+        $moderateUser->roles()->sync($moderatorRole);
     }
 }

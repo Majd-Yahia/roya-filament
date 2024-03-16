@@ -9,10 +9,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Notifications\Notifiable;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+
+
 
 class User extends Authenticatable implements FilamentUser
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, \Znck\Eloquent\Traits\BelongsToThrough;
 
     /**
      * The attributes that are mass assignable.
@@ -56,22 +59,53 @@ class User extends Authenticatable implements FilamentUser
      */
     public function roles(): BelongsToMany
     {
-        return $this->belongsToMany(Role::class, 'user_has_roles', 'user_id', 'role_id');
+        return $this->belongsToMany(Role::class);
     }
 
 
+    // Left join approach
     /**
-     * hasVerifiedEmail
+     * Define a relationship to access permissions through roles.
      *
+     * @return BelongsToMany
+     */
+    // public function permissions(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(Permission::class, 'permission_role', 'role_id', 'permission_id')
+    //         ->leftJoin('role_user', 'permission_role.role_id', '=', 'role_user.role_id')
+    //         ->where('role_user.user_id', $this->id);
+    // }
+
+    /**
+     * Define a relationship to access permissions through roles.
+     *
+     * @return HasManyThrough
+     */
+    public function permissions(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Permission::class,
+            RolePermission::class,
+            'role_id',
+            'id',
+            'id',
+            'permission_id'
+        );
+    }
+    /**
+     * Check if user has specific permissions
+     *
+     * @param  mixed $permission
      * @return bool
      */
-    public function hasVerifiedEmail(): bool
+    public function hasPermission(string $permission): bool
     {
-        return !is_null($this->email_verified_at);
+        $subset = $this->permissions->pluck('name')->toArray();
+        return in_array($permission, $subset);
     }
 
     /**
-     * canAccessPanel
+     * Check if user can access the panel
      *
      * @param Panel $panel
      * @return bool
