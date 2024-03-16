@@ -8,7 +8,7 @@
 # Project Setup
 - Clone git repository
 ```
-git clone git@github.com:Majd-Yahia/roya-filament.git
+git clone https://github.com/Majd-Yahia/roya-filament.git
 ```
 
 - cd to repository
