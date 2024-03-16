@@ -3,10 +3,12 @@
 namespace App\Filament\Admin\Resources\RolesResource\Pages;
 
 use App\Filament\Admin\Resources\RolesResource;
+use App\Models\Role;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Event;
 
 class EditRoles extends EditRecord
 {
@@ -20,11 +22,7 @@ class EditRoles extends EditRecord
     }
 
     protected function afterSave() {
-
-        $roles = Auth()->user()->roles->pluck('id')->toArray();
-
-        if(in_array($this->data['id'], $roles)) {
-            Auth()->user()->reCachePermission();
-        }
+        // Manually dispatch the updated event because most of changes are relational
+        Event::dispatch('eloquent.updated: ' . Role::class, $this->record);
     }
 }
