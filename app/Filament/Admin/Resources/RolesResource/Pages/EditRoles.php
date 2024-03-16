@@ -6,8 +6,6 @@ use App\Filament\Admin\Resources\RolesResource;
 use App\Models\Role;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 
 class EditRoles extends EditRecord
