@@ -2,19 +2,18 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\Cachable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use Illuminate\Support\Facades\Cache;
 
 class User extends Authenticatable implements FilamentUser
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Cachable;
 
     /**
      * The attributes that are mass assignable.
@@ -52,7 +51,7 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
-     * roles
+     * Define roles relationship
      *
      * @return BelongsToMany
      */
@@ -61,73 +60,32 @@ class User extends Authenticatable implements FilamentUser
         return $this->belongsToMany(Role::class);
     }
 
-
-    // Left join approach
     /**
-     * Define a relationship to access permissions through roles.
+     * Return the default relationship collection
      *
-     * @return BelongsToMany
+     * @return Collection
      */
-    // public function permissions(): BelongsToMany
-    // {
-    //     return $this->belongsToMany(Permission::class, 'permission_role', 'role_id', 'permission_id')
-    //         ->leftJoin('role_user', 'permission_role.role_id', '=', 'role_user.role_id')
-    //         ->where('role_user.user_id', $this->id);
-    // }
-
-    /**
-     * Define a relationship to access permissions through roles.
-     *
-     * @return HasManyThrough
-     */
-    public function permissions(): HasManyThrough
+    protected function getDefaultRelation(): Collection
     {
-        return $this->hasManyThrough(
-            Permission::class,
-            RolePermission::class,
-            'role_id',
-            'id',
-            'id',
-            'permission_id'
-        );
+        return $this->roles;
     }
 
     /**
      * Check if user has specific permissions
      *
-     * @param  mixed $permission
+     * @param  string $permission
      * @return bool
      */
     public function hasPermission(string $permission): bool
     {
-        // Define a cache key for the user's permissions
-        $cacheKey = 'user_permissions_' . $this->id;
-
-        // Retrieve permissions from cache if available
-        $permissions = Cache::remember($cacheKey, now()->addMinutes(60), function () {
-            return $this->permissions->pluck('name')->toArray();
-        });
-
-        // Check if the desired permission exists in the cached permissions
-        return in_array($permission, $permissions);
-    }
-
-    /**
-     * Forget and re cache permissions
-     *
-     * @return void
-     */
-    public function reCachePermission()
-    {
-        // Define a cache key for the user's permissions
-        $cacheKey = 'user_permissions_' . $this->id;
-
-        // Clear cache using the key.
-        Cache::forget($cacheKey);
-
-        // Re-cache the permissions
-        $permissions = $this->permissions->pluck('name')->toArray();
-        Cache::put($cacheKey, $permissions, now()->addMinutes(60));
+        // Iterate through each role to check if the user has the permission
+        foreach ($this->getCache() as $role) {
+            // Check if the role has the permission in its cached permissions
+            if ($role->getCache()->where('name', $permission)->isNotEmpty()) {
+                return true; // Return true if the permission is found
+            }
+        }
+        return false; // Return false if the permission is not found in any role
     }
 
     /**

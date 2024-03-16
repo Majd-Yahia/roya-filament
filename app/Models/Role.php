@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\Cachable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Collection;
 
 class Role extends Model
 {
-    use HasFactory;
+    use HasFactory, Cachable;
 
     /**
      * The attributes that are mass assignable.
@@ -38,5 +40,15 @@ class Role extends Model
     public function permissions(): BelongsToMany
     {
         return $this->belongsToMany(Permission::class);
+    }
+
+    /**
+     * Return the default relationship collection
+     *
+     * @return Collection
+     */
+    protected function getDefaultRelation(): Collection
+    {
+        return $this->permissions;
     }
 }
