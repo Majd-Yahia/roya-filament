@@ -7,6 +7,32 @@ use App\Models\Permission;
 
 class PermissionSeeder extends Seeder
 {
+
+    /**
+     * rolesPermission
+     *
+     * @var array
+     */
+    private $rolesPermission = [
+        ['name' => 'roles.index'],
+        ['name' => 'roles.create'],
+        ['name' => 'roles.edit'],
+        ['name' => 'roles.delete']
+    ];
+
+
+    /**
+     * usersPermission
+     *
+     * @var array
+     */
+    private $usersPermission = [
+        ['name' => 'users.index'],
+        ['name' => 'users.create'],
+        ['name' => 'users.edit'],
+        ['name' => 'users.delete']
+    ];
+
     /**
      * Run the database seeds.
      *
@@ -14,12 +40,7 @@ class PermissionSeeder extends Seeder
      */
     public function run()
     {
-        // Seed basic permissions
-        // Define permissions
-        Permission::create(['name' => 'roles.index']);
-        Permission::create(['name' => 'roles.create']);
-        Permission::create(['name' => 'roles.edit']);
-        Permission::create(['name' => 'roles.update']);
-        Permission::create(['name' => 'roles.delete']);
+        Permission::insert($this->rolesPermission);
+        Permission::insert($this->usersPermission);
     }
 }

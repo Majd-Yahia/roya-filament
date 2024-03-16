@@ -14,16 +14,24 @@ class RolePermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-       // Retrieve roles and permissions
-       $adminRole = Role::where('name', 'admin')->first();
-       $permissions = Permission::select('id')->get()->pluck('id');
+        // Retrieve roles and permissions
+        $adminRole = Role::where('name', 'admin')->first();
+        $permissions = Permission::select('id', 'name')->get();
 
-       // Sync permissions to roles
-       $adminRole->permissions()->sync($permissions);
 
-       $viewerRole = Role::where('name', 'viewer')->first();
-       $viewerpermission = Permission::where('name', 'roles.index')->first();
+        // Sync permissions to roles
+        $adminRole->permissions()->sync($permissions->pluck('id'));
 
-       $viewerRole->permissions()->sync([$viewerpermission->id]);
+
+        // For testing only view only role
+        $viewerRole = Role::where('name', 'viewer')->first();
+        $viewerPermissions = $permissions->whereIn('name', ['roles.index', 'roles.edit'])->pluck('id');
+        $viewerRole->permissions()->sync($viewerPermissions);
+
+
+        // For testing only Moderate role
+        $modrateRole = Role::where('name', 'role-moderator')->first();
+        $modratepermission = $permissions->whereIn('name', ['roles.index', 'roles.delete']);
+        $modrateRole->permissions()->sync($modratepermission->pluck('id'));
     }
 }

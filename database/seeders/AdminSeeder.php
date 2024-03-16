@@ -18,30 +18,55 @@ class AdminSeeder extends Seeder
         // Seed a user
         $user = User::create([
             'name' => 'Testing Admin',
-            'email' => 'test@admin.com',
+            'email' => 'admin@admin.com',
             'password' => bcrypt('password'),
         ]);
+        $user->email_verified_at = now();
+        $user->is_admin = true;
+        $user->save();
 
         // Retrieve roles and permissions
-        $adminRole = Role::where('name', 'admin')->first();
+        $adminRole = Role::get();
 
         // Assign roles to user
-        $user->roles()->sync($adminRole);
+        $user->roles()->sync($adminRole->pluck('id'));
 
 
         // ========================================================================
-        // For testing purposes only.
+        // For testing purposes only. ViewerOnly User
         // ========================================================================
-        $viewerUser = User::create([
+        $viewerOnlyUser = User::create([
             'name' => 'Testing Viewer',
             'email' => 'viewer@admin.com',
             'password' => bcrypt('password'),
         ]);
+        $viewerOnlyUser->email_verified_at = now();
+        $viewerOnlyUser->is_admin = true;
+        $viewerOnlyUser->save();
 
         // Retrieve roles and permissions
-        $viewerRole = Role::where('name', 'viewer')->first();
+        $viewerRole = $adminRole->firstWhere('name', 'viewer')->id;
 
         // Assign roles to user
-        $viewerUser->roles()->sync($viewerRole);
+        $viewerOnlyUser->roles()->sync($viewerRole);
+
+
+        // ========================================================================
+        // For testing purposes only. Viewer Delete Role User
+        // ========================================================================
+        $moderateUser = User::create([
+            'name' => 'Testing Viewer',
+            'email' => 'role-moderator@admin.com',
+            'password' => bcrypt('password'),
+        ]);
+        $moderateUser->email_verified_at = now();
+        $moderateUser->is_admin = true;
+        $moderateUser->save();
+
+        // Retrieve roles and permissions
+        $moderatorRole = $adminRole->firstWhere('name', 'role-moderator')->id;
+
+        // Assign roles to user
+        $moderateUser->roles()->sync($moderatorRole);
     }
 }
