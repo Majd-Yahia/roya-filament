@@ -1,5 +1,5 @@
 # About Project
-> This is a simple project that utilize filament admin dashboard, with simple rules and permissions along side policy gates to control CRUD opertaions.
+> This is a simple project that utilize filament admin dashboard, with simple rules and permissions along side policy gates to control CRUD opertaions, using git flow schema.
 
 # Pre-requisites
 - PHP: 8.1 or above
