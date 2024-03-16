@@ -16,19 +16,31 @@ git clone https://github.com/Majd-Yahia/roya-filament.git
 cd roya-filament
 ```
 
-- run composer install
+- Run composer install
 ```
 composer install
 ```
 
-- run migrations
+## Do not forget to add the .env to your system before you run the commands below
+
+- Run optimize
+```
+php artisan optimize
+```
+
+- Run migrations
 ```
 php artisan migrate
 ```
 
-- run seeders
+- Run seeders
 ```
 php artisan db:seed
+```
+
+- Generate key
+```
+php artisan key:generate
 ```
 
 - Serve the application at [Localhost](http://127.0.0.1:8000)
