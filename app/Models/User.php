@@ -10,12 +10,11 @@ use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Notifications\Notifiable;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-
-
+use Illuminate\Support\Facades\Cache;
 
 class User extends Authenticatable implements FilamentUser
 {
-    use HasFactory, Notifiable, \Znck\Eloquent\Traits\BelongsToThrough;
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -92,6 +91,7 @@ class User extends Authenticatable implements FilamentUser
             'permission_id'
         );
     }
+
     /**
      * Check if user has specific permissions
      *
@@ -100,8 +100,34 @@ class User extends Authenticatable implements FilamentUser
      */
     public function hasPermission(string $permission): bool
     {
-        $subset = $this->permissions->pluck('name')->toArray();
-        return in_array($permission, $subset);
+        // Define a cache key for the user's permissions
+        $cacheKey = 'user_permissions_' . $this->id;
+
+        // Retrieve permissions from cache if available
+        $permissions = Cache::remember($cacheKey, now()->addMinutes(60), function () {
+            return $this->permissions->pluck('name')->toArray();
+        });
+
+        // Check if the desired permission exists in the cached permissions
+        return in_array($permission, $permissions);
+    }
+
+    /**
+     * Forget and re cache permissions
+     *
+     * @return void
+     */
+    public function reCachePermission()
+    {
+        // Define a cache key for the user's permissions
+        $cacheKey = 'user_permissions_' . $this->id;
+
+        // Clear cache using the key.
+        Cache::forget($cacheKey);
+
+        // Re-cache the permissions
+        $permissions = $this->permissions->pluck('name')->toArray();
+        Cache::put($cacheKey, $permissions, now()->addMinutes(60));
     }
 
     /**
@@ -112,6 +138,6 @@ class User extends Authenticatable implements FilamentUser
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        return str_ends_with($this->email, '@admin.com') && $this->hasVerifiedEmail();
+        return $this->is_admin;
     }
 }
